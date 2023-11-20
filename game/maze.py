@@ -21,10 +21,12 @@ class Maze:
         self,
         horiz: list[list[bool]],
         vert: list[list[bool]],
+        lava: set[tuple[int, int]]
         collectibles: dict[tuple[int, int], str],
     ):
         self.horiz = horiz
         self.vert = vert
+        self.lava = lava
         self.collectibles = {x: spawn_turtle(x, y) for x, y in collectibles.items()}
 
     def draw_line(self, loc: tuple[int, int], direction: str, pen: turtle.Turtle):

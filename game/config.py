@@ -2,7 +2,7 @@ import turtle
 
 sc = turtle.Screen()
 
-orange = "orange.gif"
+orange = "assets/orange.gif"
 sc.addshape(orange)
 sc.update()
 
