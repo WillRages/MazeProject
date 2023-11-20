@@ -1,4 +1,4 @@
-# Will & ____ 11/20/23
+# Will & Berri 11/20/23
 
 import turtle
 from random import shuffle
