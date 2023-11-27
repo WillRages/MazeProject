@@ -1,64 +1,90 @@
 # Will & Berri 11/20/23
 
 import turtle
-from random import shuffle
+from random import shuffle, randint
 from config import *
+from time import sleep
 
 from player import *
 from maze import Maze
+from enemy import Enemy
 
 
 def print_maze(maze: list[list[bool]]):
     for row in maze:
         # row is a list of bools
-
-        # let's say x is a list, x = [1,5,2,3]
-        # f is a function that adds 1 to a number: f(3) = 4
-        # map(f, x) = [2,6,3,4]
-
+        # print row as a binary string again
         print("".join(map(str, map(int, row))))
 
 
+# convert list of binary strings into 2d array of bools
 def cvt_text_repr(text: list[str]) -> list[list[bool]]:
     return [[y == "1" for y in x] for x in text]
 
 
-def println(text: list):
-    for x in text:
-        print(x)
-
-
 def load_level(level_idx: int) -> Maze:
-    global player_turtle, james
+    global player_turtle, drawing_turtle, move_queue
     # unpack configuration tuple
-    (horiz, vert, items, enemy) = levels[level_idx]
+    (horiz, vert, items, data) = levels[level_idx]
 
     # read wall strings into 2d wall arrays
     (maze_horiz, maze_vert) = (cvt_text_repr(vert), cvt_text_repr(horiz))
 
     # create maze object using wall arrays
-    maze_obj = Maze(maze_horiz, maze_vert, items)
+    maze_obj = Maze(maze_horiz, maze_vert, set(), items)
 
     # create player using a turtle object and a set of starting coordinates
-    player = Player(player_turtle, (4, -1))
+    player = Player(new_player_turtle(), data["spawnpoint"])
+
+    # create an enemy object
+    enemies = [Enemy(new_enemy_turtle(), (x, y)) for (x, y) in data["enemies"]]
 
     # draw the map using james turtle object
-    maze_obj.draw_map(james)
+    maze_obj.draw_map(drawing_turtle)
+
+    move_queue = []
+
+    def move_both(dir: str):
+        # lock on moving to prevent multiple move methods
+        # from running at the same time, which breaks things
+        # while still keeping controls responsive
+
+        def foo(moving=[False]):
+            global move_queue
+            # move_queue.append(dir)
+            if moving[0]:
+                return
+            moving[0] = True
+            # while len(move_queue) > 0:
+            player.move(dir, maze_obj)
+            for enemy in enemies:
+                if randint(0, 4) == 0:
+                    enemy.move_randomly(maze_obj)
+                else:
+                    enemy.move(dir, maze_obj)
+                enemy.kill_player((player.x, player.y))
+                # move_queue.pop(0)
+            moving[0] = False
+
+        return foo
 
     # register keybindings
-    sc.onkeypress(lambda: player.move("right", maze_obj), "Right")
-    sc.onkeypress(lambda: player.move("left", maze_obj), "Left")
-    sc.onkeypress(lambda: player.move("up", maze_obj), "Up")
-    sc.onkeypress(lambda: player.move("down", maze_obj), "Down")
+    sc.onkeypress(move_both("right"), "Right")
+    sc.onkeypress(move_both("left"), "Left")
+    sc.onkeypress(move_both("up"), "Up")
+    sc.onkeypress(move_both("down"), "Down")
 
-    sc.onkeypress(lambda: player.move("right", maze_obj), "d")
-    sc.onkeypress(lambda: player.move("left", maze_obj), "a")
-    sc.onkeypress(lambda: player.move("up", maze_obj), "w")
-    sc.onkeypress(lambda: player.move("down", maze_obj), "s")
+    sc.onkeypress(move_both("right"), "d")
+    sc.onkeypress(move_both("left"), "a")
+    sc.onkeypress(move_both("up"), "w")
+    sc.onkeypress(move_both("down"), "s")
+
+    sc.listen()
+
+    sc.mainloop()
+
+    # while maze_obj:
+    # sleep(0.1)
 
 
 load_level(0)
-
-
-sc.listen()
-sc.exitonclick()

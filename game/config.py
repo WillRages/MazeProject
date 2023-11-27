@@ -7,15 +7,26 @@ sc.addshape(orange)
 sc.update()
 
 
-player_turtle = turtle.Turtle()
-player_turtle.up()
-player_turtle.turtlesize(2)
+def new_player_turtle():
+    player_turtle = turtle.Turtle()
+    player_turtle.up()
+    player_turtle.turtlesize(2)
+    return player_turtle
 
 
-james = turtle.Turtle()
-james.speed(0)
-james.hideturtle()
-james.pensize(10)
+def new_enemy_turtle():
+    enemy_turtle = turtle.Turtle()
+    enemy_turtle.up()
+    enemy_turtle.speed(0)
+    enemy_turtle.turtlesize(2)
+    enemy_turtle.pencolor("red")
+    return enemy_turtle
+
+
+drawing_turtle = turtle.Turtle()
+drawing_turtle.speed(0)
+drawing_turtle.hideturtle()
+drawing_turtle.pensize(10)
 
 line_size = 70
 
@@ -50,7 +61,16 @@ levels: list = [
             "1111101111",
         ],
         {(2, 4): orange},
-        (5, 5),
+        {
+            "spawnpoint": (4, -1),
+            "enemies": [
+                (4, 6),
+                (4, 7),
+                (4, 8),
+            ],
+            "lava": [],
+            "exit": (0, 0),
+        },
     ),
     (
         [

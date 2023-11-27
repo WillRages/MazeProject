@@ -21,7 +21,7 @@ class Maze:
         self,
         horiz: list[list[bool]],
         vert: list[list[bool]],
-        lava: set[tuple[int, int]]
+        lava: list[tuple[int, int]],
         collectibles: dict[tuple[int, int], str],
     ):
         self.horiz = horiz

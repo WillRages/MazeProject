@@ -1,4 +1,5 @@
 import turtle
+import time
 
 from config import *
 from maze import Maze
@@ -29,24 +30,19 @@ class Player:
     def __init__(self, turtle: turtle.Turtle, loc: tuple[int, int] = (0, 0)):
         self.turtle = turtle
         turtle.up()
-        turtle.goto(
+        self.goto(loc)
+
+        self.x, self.y = loc
+
+        self.inventory = []
+
+    def goto(self, loc: tuple[int, int]):
+        self.turtle.goto(
             -board_offset[0] + line_size // 2 + line_size * loc[0],
             board_offset[1] - line_size // 2 - line_size * loc[1],
         )
 
-        self.x, self.y = loc
-
-        self.moving = False
-
-        self.inventory = []
-
     def move(self, direction: str, maze: Maze):
-        # lock on moving to prevent multiple move methods
-        # from running at the same time, which breaks things
-        # while still keeping controls responsive
-        if self.moving:
-            return
-        self.moving = True
         can_move, pickup = maze.check_dir((self.x, self.y), direction)
 
         if not pickup is None:
@@ -56,12 +52,9 @@ class Player:
         self.turtle.seth(self.dir_map[direction])
 
         if can_move:
-            self.turtle.forward(line_size)
+            # self.turtle.goto()
+            # self.turtle.forward(line_size)
             x, y = self.dir_update[direction]
             self.x += x
             self.y += y
-        self.moving = False
-
-
-class Enemy(Player):
-    pass
+            self.goto((self.x, self.y))
