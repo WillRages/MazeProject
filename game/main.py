@@ -70,7 +70,11 @@ def load_level(level_idx: int) -> Maze:
 
             if player.on_any([data["exit"]]):
                 player, enemies, maze_obj = (None, None, None)
-                load_level(level_idx + 1)
+                try:
+                    load_level(level_idx + 1)
+                except IndexError:
+                    print("You win!")
+                    exit()
 
             moving = False
 
@@ -95,4 +99,4 @@ def load_level(level_idx: int) -> Maze:
     # sleep(0.1)
 
 
-load_level(0)
+load_level(1)
