@@ -23,11 +23,45 @@ class Maze:
         vert: list[list[bool]],
         lava: list[tuple[int, int]],
         collectibles: dict[tuple[int, int], str],
+        end: tuple[int, int],
     ):
         self.horiz = horiz
         self.vert = vert
         self.lava = lava
         self.collectibles = {x: spawn_turtle(x, y) for x, y in collectibles.items()}
+        self.end = end
+
+    def draw_box(
+        self,
+        a: tuple[int, int],
+        b: tuple[int, int],
+        color: str,
+        pen: turtle.Turtle,
+    ):
+        pen.up()
+        pen.goto(
+            -board_offset[0] + a[0] * line_size,
+            board_offset[1] - a[1] * line_size,
+        )
+
+        pen.begin_fill()
+        pen.fillcolor(color)
+
+        pen.goto(
+            -board_offset[0] + a[0] * line_size,
+            board_offset[1] - b[1] * line_size,
+        )
+        pen.goto(
+            -board_offset[0] + b[0] * line_size,
+            board_offset[1] - b[1] * line_size,
+        )
+        pen.goto(
+            -board_offset[0] + b[0] * line_size,
+            board_offset[1] - a[1] * line_size,
+        )
+
+        pen.end_fill()
+        pen.fillcolor("black")
 
     def draw_line(self, loc: tuple[int, int], direction: str, pen: turtle.Turtle):
         pen.up()
@@ -42,6 +76,11 @@ class Maze:
 
     def draw_map(self, pen: turtle.Turtle):
         lines = []
+
+        for x, y in self.lava:
+            self.draw_box((x, y), (x + 1, y + 1), "red", pen)
+
+        self.draw_box(self.end, (self.end[0] + 1, self.end[1] + 1), "lime", pen)
 
         for i, row in enumerate(self.horiz):
             for j, draw_line in enumerate(row):

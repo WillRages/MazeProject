@@ -42,6 +42,9 @@ class Player:
             board_offset[1] - line_size // 2 - line_size * loc[1],
         )
 
+    def on_any(self, spots: list[tuple[int, int]]):
+        return any((self.x, self.y) == loc for loc in spots)
+
     def move(self, direction: str, maze: Maze):
         can_move, pickup = maze.check_dir((self.x, self.y), direction)
 

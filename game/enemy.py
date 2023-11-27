@@ -15,8 +15,3 @@ class Enemy(Player):
 
     def move_randomly(self, maze: Maze):
         self.move(choice(self.directions), maze)
-
-    def kill_player(self, player_coords: tuple[int, int]):
-        if (self.x, self.y) == player_coords:
-            print("You died! :<")
-            exit()

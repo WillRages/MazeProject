@@ -23,7 +23,9 @@ def cvt_text_repr(text: list[str]) -> list[list[bool]]:
 
 
 def load_level(level_idx: int) -> Maze:
-    global player_turtle, drawing_turtle, move_queue
+    global player, enemies, maze_obj, moving
+    sc.clear()
+
     # unpack configuration tuple
     (horiz, vert, items, data) = levels[level_idx]
 
@@ -31,7 +33,7 @@ def load_level(level_idx: int) -> Maze:
     (maze_horiz, maze_vert) = (cvt_text_repr(vert), cvt_text_repr(horiz))
 
     # create maze object using wall arrays
-    maze_obj = Maze(maze_horiz, maze_vert, set(), items)
+    maze_obj = Maze(maze_horiz, maze_vert, data["lava"], items, data["exit"])
 
     # create player using a turtle object and a set of starting coordinates
     player = Player(new_player_turtle(), data["spawnpoint"])
@@ -42,29 +44,35 @@ def load_level(level_idx: int) -> Maze:
     # draw the map using james turtle object
     maze_obj.draw_map(drawing_turtle)
 
-    move_queue = []
+    # lock on moving to prevent multiple move methods
+    # from running at the same time, which breaks things
+    # while still keeping controls responsive
+    moving = False
 
     def move_both(dir: str):
-        # lock on moving to prevent multiple move methods
-        # from running at the same time, which breaks things
-        # while still keeping controls responsive
-
-        def foo(moving=[False]):
-            global move_queue
-            # move_queue.append(dir)
-            if moving[0]:
+        def foo():
+            global player, enemies, maze_obj, moving
+            if moving:
                 return
-            moving[0] = True
-            # while len(move_queue) > 0:
+            moving = True
             player.move(dir, maze_obj)
             for enemy in enemies:
                 if randint(0, 4) == 0:
                     enemy.move_randomly(maze_obj)
                 else:
                     enemy.move(dir, maze_obj)
-                enemy.kill_player((player.x, player.y))
-                # move_queue.pop(0)
-            moving[0] = False
+
+            danger = maze_obj.lava + [(enemy.x, enemy.y) for enemy in enemies]
+
+            if player.on_any(danger):
+                print("you died :<")
+                exit()
+
+            if player.on_any([data["exit"]]):
+                player, enemies, maze_obj = (None, None, None)
+                load_level(level_idx + 1)
+
+            moving = False
 
         return foo
 
