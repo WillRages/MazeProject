@@ -1,8 +1,7 @@
-from config import *
-from player import Player
-from maze import Maze
-import turtle
 from random import choice
+
+from maze import Maze
+from player import Player
 
 
 class Enemy(Player):

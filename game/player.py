@@ -1,7 +1,6 @@
 import turtle
-import time
 
-from config import *
+from config import board_offset, line_size
 from maze import Maze
 
 
@@ -48,7 +47,7 @@ class Player:
     def move(self, direction: str, maze: Maze):
         can_move, pickup = maze.check_dir((self.x, self.y), direction)
 
-        if not pickup is None:
+        if pickup is not None:
             print(f"Picked up {pickup}!")
             self.inventory.append(pickup)
 

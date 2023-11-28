@@ -1,13 +1,12 @@
 # Will & Berri 11/20/23
 
-import turtle
-from random import shuffle, randint
-from config import *
-from time import sleep
+from random import randint
 
-from player import *
-from maze import Maze
+from config import drawing_turtle, levels, new_enemy_turtle, new_player_turtle, sc
 from enemy import Enemy
+from level import Level
+from maze import Maze
+from player import Player
 
 
 def print_maze(maze: list[list[bool]]):
@@ -22,26 +21,30 @@ def cvt_text_repr(text: list[str]) -> list[list[bool]]:
     return [[y == "1" for y in x] for x in text]
 
 
-def load_level(level_idx: int) -> Maze:
+def load_level(level_idx: int):
     global player, enemies, maze_obj, moving
     sc.clear()
 
-    # unpack configuration tuple
-    (horiz, vert, items, data) = levels[level_idx]
+    # load level out of level array
+    level: Level = levels[level_idx]
+    print(level.instructions)
+    horiz = level.horizontal_walls
+    vert = level.vertical_walls
+    items = level.collectibles
 
     # read wall strings into 2d wall arrays
     (maze_horiz, maze_vert) = (cvt_text_repr(vert), cvt_text_repr(horiz))
 
     # create maze object using wall arrays
-    maze_obj = Maze(maze_horiz, maze_vert, data["lava"], items, data["exit"])
+    maze_obj = Maze(maze_horiz, maze_vert, level.lava, items, level.exit)
 
     # create player using a turtle object and a set of starting coordinates
-    player = Player(new_player_turtle(), data["spawnpoint"])
+    player = Player(new_player_turtle(), level.spawnpoint)
 
     # create an enemy object
-    enemies = [Enemy(new_enemy_turtle(), (x, y)) for (x, y) in data["enemies"]]
+    enemies = [Enemy(new_enemy_turtle(), loc) for loc in level.enemies]
 
-    # draw the map using james turtle object
+    # draw the map using turtle object
     maze_obj.draw_map(drawing_turtle)
 
     # lock on moving to prevent multiple move methods
@@ -49,9 +52,11 @@ def load_level(level_idx: int) -> Maze:
     # while still keeping controls responsive
     moving = False
 
+    # function that creates a movement callback for the specified direction
     def move_both(dir: str):
+        # inner function
         def foo():
-            global player, enemies, maze_obj, moving
+            global moving, player, maze_obj, enemies
             if moving:
                 return
             moving = True
@@ -64,13 +69,17 @@ def load_level(level_idx: int) -> Maze:
 
             danger = maze_obj.lava + [(enemy.x, enemy.y) for enemy in enemies]
 
+            # if player is on any dangerous spots, die
             if player.on_any(danger):
                 print("you died :<")
                 exit()
 
-            if player.on_any([data["exit"]]):
+            # if player is on the exit, go to the next one
+            if player.on_any([level.exit]):
+                # delete current objects
                 player, enemies, maze_obj = (None, None, None)
                 try:
+                    # recursive level loading is probably bad practice
                     load_level(level_idx + 1)
                 except IndexError:
                     print("You win!")
@@ -95,8 +104,5 @@ def load_level(level_idx: int) -> Maze:
 
     sc.mainloop()
 
-    # while maze_obj:
-    # sleep(0.1)
-
-
-load_level(1)
+# start at first level
+load_level(0)
